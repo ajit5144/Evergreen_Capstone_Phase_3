@@ -3,6 +3,8 @@
 // work and stay as-is. The quote routes and GraphQL are wired in on Day 2.
 import express from "express";
 import { connectDB } from "./db.js";
+import {registerQuoteRoutes} from "./routes.js";
+import {mountGraphQL} from "./graphql.js";
 // INSERT: route import (Day 2 - paste the line from the kit README here)
 // INSERT: GraphQL import (Day 2 - paste the line from the kit README here)
 
@@ -17,8 +19,10 @@ app.get("/", (req, res) => {
 });
 
 // INSERT: register the quote routes (Day 2 - paste the line from the kit README here)
+registerQuoteRoutes(app);
 
 // INSERT: mount GraphQL (Day 2 - paste the line from the kit README here)
+mountGraphQL(app);
 
 // The two handlers below must stay AFTER the routes: Express checks them in order.
 app.use((req, res) => {
