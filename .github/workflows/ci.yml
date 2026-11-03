@@ -12,16 +12,23 @@ jobs:
   test:
     name: Test the API
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: starter
+
     services:
       mongodb:
         image: mongo:7
         ports:
           - 27017:27017
+
     steps:
       - name: Check out the code
         uses: actions/checkout@v4
 
       - name: Inspect Project Structure
+        working-directory: .
         run: |
           echo "=== Project tree (up to 4 levels) ==="
           if command -v tree >/dev/null 2>&1; then
@@ -40,12 +47,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: Evergreen_Capstone_Phase_3/starter/package-lock.json
+          cache-dependency-path: starter/package-lock.json
 
       - name: Install dependencies from the lock file
-        working-directory: Evergreen_Capstone_Phase_3/starter
         run: npm ci
 
       - name: Run the API tests (the safety net)
-        working-directory: Evergreen_Capstone_Phase_3/starter
         run: npm test
