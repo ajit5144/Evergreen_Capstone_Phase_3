@@ -21,18 +21,31 @@ jobs:
       - name: Check out the code
         uses: actions/checkout@v4
 
+      - name: Inspect Project Structure
+        run: |
+          echo "=== Project tree (up to 4 levels) ==="
+          if command -v tree >/dev/null 2>&1; then
+            tree -a -L 4 -I 'node_modules|.git'
+          else
+            find . -maxdepth 4 \
+              -type d $$ -name node_modules -o -name .git $$ -prune \
+              -o -print | sort
+          fi
+
+          echo "=== Committed package-lock.json paths ==="
+          git ls-files '*package-lock.json'
+
       - name: Set up Node 22
         uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: |
-            Evergreen_Capstone_Phase_3/starter/package-lock.json
+          cache-dependency-path: Evergreen_Capstone_Phase_3/starter/package-lock.json
 
       - name: Install dependencies from the lock file
-        working-directory: evergreen_capstone_phase_3/starter
+        working-directory: Evergreen_Capstone_Phase_3/starter
         run: npm ci
 
       - name: Run the API tests (the safety net)
-        working-directory: evergreen_capstone_phase_3/starter
+        working-directory: Evergreen_Capstone_Phase_3/starter
         run: npm test
