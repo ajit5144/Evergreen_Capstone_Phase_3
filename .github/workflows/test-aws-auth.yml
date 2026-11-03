@@ -1,9 +1,10 @@
 name: Test AWS Authentication
 
 on:
-  workflow_dispatch:
-  push:
-    branches: 
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches:
       - main
       - feature_branch
 
@@ -14,33 +15,22 @@ permissions:
 jobs:
   verify:
     name: Verify AWS deployment access
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Inspect workflow identity context
+      - name: Show successful CI source
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          REPOSITORY: ${{ github.repository }}
-          REF: ${{ github.ref }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+          SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
         run: |
-          echo "Event: $EVENT_NAME"
-          echo "Repository: $REPOSITORY"
-          echo "Ref: $REF"
-          
-      - name: Inspect OIDC identity claims
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const token = await core.getIDToken('sts.amazonaws.com');
-            core.setSecret(token);
-
-            const claims = JSON.parse(
-              Buffer.from(token.split('.')[1], 'base64url').toString('utf8')
-            );
-
-            core.info(`Subject: ${claims.sub}`);
-            core.info(`Audience: ${claims.aud}`);
-            core.info(`Issuer: ${claims.iss}`);
+          echo "CI run ID: $SOURCE_RUN_ID"
+          echo "Source branch: $SOURCE_BRANCH"
+          echo "Tested commit: $SOURCE_SHA"
 
       - name: Configure AWS credentials through OIDC
         uses: aws-actions/configure-aws-credentials@v4
@@ -56,3 +46,26 @@ jobs:
         run: |
           aws s3 ls s3://evergreen-quote-site-ajit-v001 \
             --region us-east-2
+
+      - name: Record tested deployment source
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+          SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          mkdir -p deployment-source
+
+          jq -n \
+            --arg sha "$SOURCE_SHA" \
+            --arg branch "$SOURCE_BRANCH" \
+            --arg run_id "$SOURCE_RUN_ID" \
+            '{sha: $sha, branch: $branch, ci_run_id: $run_id}' \
+            > deployment-source/source.json
+
+      - name: Upload tested deployment source
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-source
+          path: deployment-source/source.json
+          if-no-files-found: error
+          retention-days: 7
