@@ -1,0 +1,29 @@
+name: Test AWS Authentication
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  verify:
+    name: Verify AWS deployment access
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Configure AWS credentials through OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-2
+          role-session-name: GitHubAuthTest-${{ github.run_id }}
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
+
+      - name: Verify S3 bucket access
+        run: |
+          aws s3 ls s3://evergreen-quote-site-ajit-v001 \
+            --region us-east-2
