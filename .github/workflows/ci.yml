@@ -19,14 +19,15 @@ jobs:
           - 27017:27017
     steps:
       - name: Check out the code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
-      - name: Set up Node 24
+      - name: Set up Node 22
         uses: actions/setup-node@v5
         with:
-          node-version: 24
+          node-version: 22
           cache: npm
-          cache-dependency-path: evergreen_capstone_phase_3/starter/package-lock.json
+          cache-dependency-path: |
+            Evergreen_Capstone_Phase_3/starter/package-lock.json
 
       - name: Install dependencies from the lock file
         working-directory: evergreen_capstone_phase_3/starter
