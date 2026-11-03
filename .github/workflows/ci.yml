@@ -26,9 +26,12 @@ jobs:
         with:
           node-version: 24
           cache: npm
+          cache-dependency-path: evergreen_capstone_phase_3/starter/package-lock.json
 
       - name: Install dependencies from the lock file
+        working-directory: evergreen_capstone_phase_3/starter
         run: npm ci
 
       - name: Run the API tests (the safety net)
+        working-directory: evergreen_capstone_phase_3/starter
         run: npm test
