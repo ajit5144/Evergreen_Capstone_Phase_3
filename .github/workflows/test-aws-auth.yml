@@ -2,6 +2,14 @@ name: Test AWS Authentication
 
 on:
   workflow_dispatch:
+  push:
+    branches: 
+      - main
+      - feature_branch
+  pull_request:
+    branches: 
+      - main
+  
 
 permissions:
   contents: read
