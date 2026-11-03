@@ -21,6 +21,16 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
+      - name: Inspect workflow identity context
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          REF: ${{ github.ref }}
+        run: |
+          echo "Event: $EVENT_NAME"
+          echo "Repository: $REPOSITORY"
+          echo "Ref: $REF"
+
       - name: Configure AWS credentials through OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
