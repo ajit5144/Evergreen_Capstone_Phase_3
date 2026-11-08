@@ -3,8 +3,8 @@
 > Copy to `delivery-leadership-package/status-update.md`. Send it (i.e., paste it in the cohort channel) at the end of the day an inject lands. Target length: ~150 words.
 
 **To:** _stakeholder (in this case: the instructor as project sponsor)_
-**From:** _your name_
-**Date:**
+**From:** Ajit Ranjan Sahu
+**Date:** 11
 
 ## What shipped today
 

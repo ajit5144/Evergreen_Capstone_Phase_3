@@ -1,15 +1,14 @@
 # Go / No-Go: Merge Decision
 
-> Copy to `delivery-leadership-package/go-no-go.md`. Make this call **from** the CI result, not in spite of it.
 
-**Date / time:**
-**Decision:** ☐ GO   ☐ NO-GO   ☐ GO WITH CONDITIONS
+**Date / time:11/12/2026
+**Decision:**   ☐ NO-GO   
 
 ## CI evidence
 
-- Latest run on `delivery/lead`: _green / red_  ·  link: _paste URL_
+- Latest run on `feature branch: _green  ·  link: https://github.com/ajit5144/Evergreen_Capstone_Phase_3/actions/runs/41711171302
 - Workflow file: `.github/workflows/ci.yml`
-- What the workflow actually checked: _name the steps_
+- What the workflow actually checked: 
 
 ## What "GO" would mean
 
@@ -18,10 +17,10 @@
 
 ## What "NO-GO" would mean
 
-- Hold the merge until: _condition_.
-- Owner of that condition: _name_.
-- Re-evaluate at: _time_.
+- Hold the merge until the premium discrepancy is validated 
+- Owner of that condition: Delivery lead
+- Re-evaluate at: 11/13/2026
 
 ## My call
 
-_2–3 sentences. State the call. Name the *one* thing that drove it. Name what would flip it._
+My call is NO-GO for release merges and deployments because main has failing tests and customers cannot obtain quotes. I am asking engineering to confirm the validation rules and platform to verify the customer-facing version and deployment path. I will reconsider when the proposed release passes CI, valid quotes succeed, and Support confirms recovery.
