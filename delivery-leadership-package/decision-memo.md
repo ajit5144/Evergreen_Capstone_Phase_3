@@ -43,7 +43,7 @@ Support reports that customers cannot obtain quotes because requests return 400 
 
 1. **Option A: Continue merging while engineering investigates**  MKeeps planned delivery moving, but adds changes during an unresolved incident and bypasses the green-CI release requirement.
 
-2. **Option B: Hold release changes and coordinate investigation and recovery** PProtects customers from additional uncertainty and preserves the quality gate, but may delay the planned delivery.
+2. **Option B: Hold release changes and coordinate investigation and recovery** Protects customers from additional uncertainty and preserves the quality gate, but may delay the planned delivery.
 
 
 
