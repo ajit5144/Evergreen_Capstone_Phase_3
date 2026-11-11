@@ -1,0 +1,71 @@
+name: Test AWS Authentication
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches:
+      - main
+      - feature_branch
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  verify:
+    name: Verify AWS deployment access
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Show successful CI source
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+          SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          echo "CI run ID: $SOURCE_RUN_ID"
+          echo "Source branch: $SOURCE_BRANCH"
+          echo "Tested commit: $SOURCE_SHA"
+
+      - name: Configure AWS credentials through OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-2
+          role-session-name: GitHubAuthTest-${{ github.run_id }}
+
+      - name: Verify AWS identity
+        run: aws sts get-caller-identity
+
+      - name: Verify S3 bucket access
+        run: |
+          aws s3 ls s3://evergreen-quote-site-ajit-v001 \
+            --region us-east-2
+
+      - name: Record tested deployment source
+        env:
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+          SOURCE_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          mkdir -p deployment-source
+
+          jq -n \
+            --arg sha "$SOURCE_SHA" \
+            --arg branch "$SOURCE_BRANCH" \
+            --arg run_id "$SOURCE_RUN_ID" \
+            '{sha: $sha, branch: $branch, ci_run_id: $run_id}' \
+            > deployment-source/source.json
+
+      - name: Upload tested deployment source
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-source
+          path: deployment-source/source.json
+          if-no-files-found: error
+          retention-days: 7

@@ -1,0 +1,56 @@
+# ci.yml - the Evergreen Quote API pipeline (provided).
+# Capstone learners: enable this by copying it to .github/workflows/ci.yml in
+# your repository. Do not modify it.
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test the API
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: starter
+
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v5
+
+      - name: Inspect Project Structure
+        working-directory: .
+        run: |
+          echo "=== Project tree (up to 4 levels) ==="
+          if command -v tree >/dev/null 2>&1; then
+            tree -a -L 4 -I 'node_modules|.git'
+          else
+            find . -maxdepth 4 \
+              -type d $$ -name node_modules -o -name .git $$ -prune \
+              -o -print | sort
+          fi
+
+          echo "=== Committed package-lock.json paths ==="
+          git ls-files '*package-lock.json'
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: starter/package-lock.json
+
+      - name: Install dependencies from the lock file
+        run: npm ci
+
+      - name: Run the API tests (the safety net)
+        run: npm test
